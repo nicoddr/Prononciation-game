@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d0e11" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>French Prononciation — Fight</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath fill='%23ffc463' d='M2 0h2v1H2zM8 0h2v1H8zM1 1h4v1H1zM7 1h4v1H7zM0 2h12v3H0zM1 5h10v1H1zM2 6h8v1H2zM3 7h6v1H3zM4 8h4v1H4zM5 9h2v1H5z'/%3E%3C/svg%3E" />
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/pixel.css" />
+</head>
+<body>
+  <div class="viewport">
+    <div class="frame game-frame" id="frame">
+      <div class="game">
+        <header class="hud">
+          <div class="hearts" id="hearts" role="img" aria-label="Health: 5 of 5 hearts"></div>
+          <div class="hud-right">
+            <div class="level-chip"><span>LVL</span><b id="levelNum">1</b><i>/5</i></div>
+            <button class="mute-btn hud-mute" data-settings type="button" aria-label="Audio settings"></button>
+            <button class="mute-btn hud-mute" data-mute type="button" aria-label="Mute sound"></button>
+          </div>
+        </header>
+
+        <section class="stage" id="stage">
+          <div class="scene-bg" id="sceneBg"></div>
+          <div class="stage-shade" aria-hidden="true"></div>
+
+          <div class="scene-fx" aria-hidden="true">
+            <span class="scene-ember" style="left: 8%; --dur: 8.5s; --delay: 0s; --drift: 3cqw;"></span>
+            <span class="scene-ember" style="left: 24%; --dur: 11s; --delay: 2.2s; --drift: -2cqw;"></span>
+            <span class="scene-ember" style="left: 42%; --dur: 9.5s; --delay: 4.4s; --drift: 2cqw;"></span>
+            <span class="scene-ember" style="left: 59%; --dur: 12s; --delay: 1.3s; --drift: -3cqw;"></span>
+            <span class="scene-ember" style="left: 74%; --dur: 8s; --delay: 3.7s; --drift: 4cqw;"></span>
+            <span class="scene-ember" style="left: 89%; --dur: 10.5s; --delay: 5.6s; --drift: -1cqw;"></span>
+          </div>
+
+          <div class="level-tag" id="levelTag">LVL 1 · RUE DE PARIS</div>
+          <div class="pips" id="pips" aria-hidden="true"></div>
+
+          <div class="speech" id="speech" aria-live="polite">
+            <div class="speech-top">
+              <span class="speech-tag" id="speechTag">CRS</span>
+              <span class="speech-hint">Say it</span>
+            </div>
+            <span class="speech-word" id="speechWord">Lutte</span>
+            <span class="speech-en" id="speechEn">Struggle / Fight</span>
+            <span class="speech-tail" aria-hidden="true"></span>
+          </div>
+
+          <div class="actors">
+            <div class="actor-slot player-slot is-idle" id="playerSlot">
+              <div class="actor">
+                <div class="sprite" id="playerSprite">
+                  <img id="playerImg" alt="Your fighter" draggable="false" />
+                </div>
+              </div>
+            </div>
+            <div class="enemy-row" id="enemyRow"></div>
+          </div>
+
+          <div class="fx" id="fx" aria-hidden="true"></div>
+          <div class="hurt-flash" id="hurtFlash" aria-hidden="true"></div>
+          <div class="banner" id="banner" aria-live="polite"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <span class="panel-label">Say it out loud</span>
+            <span class="status" id="status">READY</span>
+          </div>
+
+          <div class="controls">
+            <button class="skip-btn" id="skipBtn" type="button" disabled aria-label="Skip the word: knock down an enemy and lose one heart" title="Skip the word: knock down an enemy and lose 1 heart">
+              <svg class="skip-arrow" viewBox="0 0 16 16" aria-hidden="true">
+                <rect x="7" y="1" width="2" height="8" />
+                <rect x="5" y="7" width="2" height="2" />
+                <rect x="9" y="7" width="2" height="2" />
+                <rect x="3" y="9" width="2" height="2" />
+                <rect x="11" y="9" width="2" height="2" />
+                <rect x="5" y="11" width="6" height="2" />
+                <rect x="7" y="13" width="2" height="1" />
+              </svg>
+              <span class="skip-label">Skip</span>
+              <span class="skip-cost">
+                <span aria-hidden="true">-1</span>
+                <svg viewBox="0 0 12 10" aria-hidden="true"><path d="M2 0h2v1H2zM8 0h2v1H8zM1 1h4v1H1zM7 1h4v1H7zM0 2h12v3H0zM1 5h10v1H1zM2 6h8v1H2zM3 7h6v1H3zM4 8h4v1H4zM5 9h2v1H5z" /></svg>
+              </span>
+            </button>
+
+            <div class="mic-wrap" id="micWrap">
+              <button class="mic-btn" id="micBtn" type="button" aria-label="Hold to speak" aria-pressed="false" disabled>
+                <svg class="mic-icon" viewBox="0 0 16 20" aria-hidden="true">
+                  <rect x="6" y="0" width="4" height="1" />
+                  <rect x="5" y="1" width="6" height="9" />
+                  <rect x="4" y="3" width="1" height="5" />
+                  <rect x="11" y="3" width="1" height="5" />
+                  <rect x="5" y="10" width="6" height="1" />
+                  <rect x="7" y="11" width="2" height="3" />
+                  <rect x="4" y="14" width="8" height="1" />
+                  <rect x="7" y="15" width="2" height="2" />
+                  <rect x="5" y="17" width="6" height="1" />
+                  <rect x="6" y="3" width="4" height="1" fill="rgba(0,0,0,0.32)" />
+                  <rect x="6" y="5.5" width="4" height="1" fill="rgba(0,0,0,0.32)" />
+                  <rect x="6" y="8" width="4" height="1" fill="rgba(0,0,0,0.32)" />
+                </svg>
+                <span class="spark"></span>
+                <span class="spark"></span>
+                <span class="spark"></span>
+                <span class="spark"></span>
+                <span class="spark"></span>
+                <span class="spark"></span>
+                <span class="spark"></span>
+                <span class="spark"></span>
+              </button>
+              <span class="mic-hint" id="micHint">HOLD</span>
+            </div>
+
+            <button class="replay-btn" id="replayBtn" type="button" aria-label="Repeat the word">
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <rect x="1" y="6" width="3" height="4" />
+                <rect x="4" y="4" width="2" height="8" />
+                <rect x="6" y="2" width="2" height="12" />
+                <rect x="10" y="5" width="1" height="6" />
+                <rect x="12" y="3" width="1" height="10" />
+                <rect x="14" y="1" width="1" height="14" />
+              </svg>
+              <span>Repeat</span>
+            </button>
+          </div>
+
+          <div class="caption" id="caption">Hold the mic and pronounce the word</div>
+
+          <form class="type-form" id="typeForm" hidden>
+            <input id="typeInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="TYPE THE FRENCH WORD..." aria-label="Type the French word" />
+            <button type="submit">OK</button>
+          </form>
+        </section>
+      </div>
+
+      <div class="overlay" id="overlay" hidden></div>
+
+      <div class="scanlines" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <div class="rotate-hint">
+    Rotate your phone
+    <span>This game is played in portrait mode.</span>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

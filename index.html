@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d0e11" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="French Prononciation — hold the mic, pronounce French words and fight your way across Paris." />
+  <title>French Prononciation</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath fill='%23ffc463' d='M2 0h2v1H2zM8 0h2v1H8zM1 1h4v1H1zM7 1h4v1H7zM0 2h12v3H0zM1 5h10v1H1zM2 6h8v1H2zM3 7h6v1H3zM4 8h4v1H4zM5 9h2v1H5z'/%3E%3C/svg%3E" />
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/pixel.css" />
+</head>
+<body>
+  <div class="viewport">
+    <div class="frame home-frame">
+      <div class="home-bg" aria-hidden="true"></div>
+      <div class="embers" aria-hidden="true">
+        <span class="ember" style="left: 12%; --dur: 9s; --delay: 0s;"></span>
+        <span class="ember" style="left: 27%; --dur: 12s; --delay: 2.4s;"></span>
+        <span class="ember" style="left: 46%; --dur: 10s; --delay: 5s;"></span>
+        <span class="ember" style="left: 63%; --dur: 13s; --delay: 1.2s;"></span>
+        <span class="ember" style="left: 78%; --dur: 8.5s; --delay: 3.6s;"></span>
+        <span class="ember" style="left: 90%; --dur: 11s; --delay: 6.2s;"></span>
+      </div>
+
+      <button class="mute-btn home-settings" data-settings type="button" aria-label="Audio settings"></button>
+      <button class="mute-btn home-mute" data-mute type="button" aria-label="Mute sound"></button>
+
+      <main class="home">
+        <div class="home-head">
+          <p class="eyebrow">Paris · Night of the riots</p>
+          <h1 class="home-title">
+            <span class="line line-a">French</span>
+            <span class="line line-b">Prononciation</span>
+          </h1>
+          <div class="pixel-rule" aria-hidden="true"></div>
+          <p class="home-sub">Try your French prononciation!<br />Salvage the city one word at a time.</p>
+        </div>
+
+        <div class="home-cta">
+          <a class="btn btn-play arcade-pulse" id="playBtn" href="select.html">
+            Play
+            <span class="btn-sub">Choose your fighter</span>
+          </a>
+          <p class="home-hint">5 hearts · 5 levels · 1 final boss</p>
+        </div>
+
+        <p class="home-foot"><span class="dot blink"></span> Hold the mic · Speak French · Fight back</p>
+      </main>
+
+      <div class="scanlines" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+      <div class="grain" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <div class="rotate-hint">
+    Rotate your phone
+    <span>This game is played in portrait mode.</span>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    FP.playMusic('Music/1-3.mp3', { volume: 0.22 });
+
+    document.getElementById('playBtn').addEventListener('click', function () {
+      FP.play('nav');
+    });
+  </script>
+</body>
+</html>

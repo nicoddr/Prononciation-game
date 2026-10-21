@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d0e11" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>French Prononciation — Choose your fighter</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath fill='%23ffc463' d='M2 0h2v1H2zM8 0h2v1H8zM1 1h4v1H1zM7 1h4v1H7zM0 2h12v3H0zM1 5h10v1H1zM2 6h8v1H2zM3 7h6v1H3zM4 8h4v1H4zM5 9h2v1H5z'/%3E%3C/svg%3E" />
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/pixel.css" />
+</head>
+<body>
+  <div class="viewport">
+    <div class="frame select-frame">
+      <div class="select-bg" aria-hidden="true"></div>
+
+      <header class="topbar">
+        <a class="icon-btn" href="index.html" aria-label="Back to home">&#9664;</a>
+        <h1 class="screen-title">Choose<br />your fighter</h1>
+        <div class="topbar-actions">
+          <button class="mute-btn" data-settings type="button" aria-label="Audio settings"></button>
+          <button class="mute-btn" data-mute type="button" aria-label="Mute sound"></button>
+        </div>
+      </header>
+
+      <p class="screen-sub">Both are French. Both are furious.</p>
+
+      <main class="fighters">
+        <a class="fighter-card" data-hero="b" href="game.html?hero=b" aria-label="Choose French B 1, the baker">
+          <span class="fighter-art">
+            <span class="tag">01</span>
+            <img src="Images/Characters/French%20B%201/Stand.png" alt="French B 1" data-stand="Images/Characters/French%20B%201/Stand.png" data-atk="Images/Characters/French%20B%201/Atk.png" />
+          </span>
+          <span class="fighter-info">
+            <span class="fighter-name">French B 1</span>
+            <span class="fighter-desc">The Baker</span>
+            <span class="fighter-weapon">Baguette · Vin rouge</span>
+          </span>
+          <span class="fighter-go">Fight &#9654;</span>
+        </a>
+
+        <a class="fighter-card" data-hero="g" href="game.html?hero=g" aria-label="Choose French G 1, the local">
+          <span class="fighter-art">
+            <span class="tag">02</span>
+            <img src="Images/Characters/French%20G%201/Stand.png" alt="French G 1" data-stand="Images/Characters/French%20G%201/Stand.png" data-atk="Images/Characters/French%20G%201/Atk.png" />
+          </span>
+          <span class="fighter-info">
+            <span class="fighter-name">French G 1</span>
+            <span class="fighter-desc">The Local</span>
+            <span class="fighter-weapon">Vin rouge · Zero patience</span>
+          </span>
+          <span class="fighter-go">Fight &#9654;</span>
+        </a>
+      </main>
+
+      <p class="select-foot">Tap a fighter · 5 hearts · 15 words</p>
+
+      <div class="scanlines" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+      <div class="grain" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <div class="rotate-hint">
+    Rotate your phone
+    <span>This game is played in portrait mode.</span>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    FP.playMusic('Music/1-3.mp3', { volume: 0.22 });
+  </script>
+  <script src="js/select.js"></script>
+</body>
+</html>
