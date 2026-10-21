@@ -191,6 +191,9 @@
   const levelNum = $('levelNum');
   const levelTag = $('levelTag');
   const pipsEl = $('pips');
+  const timerChip = $('timerChip');
+  const timerValue = $('timerValue');
+  const timerFill = $('timerFill');
   const speech = $('speech');
   const speechTag = $('speechTag');
   const speechWord = $('speechWord');
@@ -247,11 +250,13 @@
   let restartCount = 0;
   let lastError = null;
 
-  /* microphone analyser (sparkles) */
-  let micStream = null;
-  let analyser = null;
-  let micData = null;
-  let micRequested = false;
+  /* 30-second per-enemy timer */
+  const TIMER_SECONDS = 30;
+  let timerRemaining = TIMER_SECONDS * 1000;
+  let timerEnd = 0;
+  let timerRunning = false;
+  let timerShown = -1;
+  let settingsOpen = false;
 
   /* ---------------------------------------------------------------------
      Small helpers
@@ -291,6 +296,101 @@
   function setCaption(text) {
     captionEl.textContent = text;
     captionEl.className = 'caption';
+  }
+
+  /* ---------------------------------------------------------------------
+     30-second countdown per enemy / phase
+     --------------------------------------------------------------------- */
+
+  function renderTimer(force) {
+    const seconds = Math.max(0, Math.ceil(timerRemaining / 1000));
+    if (force || seconds !== timerShown) {
+      timerShown = seconds;
+      timerValue.textContent = String(seconds);
+      timerChip.setAttribute('aria-label', 'Time left: ' + seconds + ' seconds');
+    }
+    const ratio = Math.max(0, Math.min(1, timerRemaining / (TIMER_SECONDS * 1000)));
+    timerFill.style.width = (ratio * 100).toFixed(1) + '%';
+    timerChip.classList.toggle('low', timerRunning && seconds <= 10);
+    timerChip.classList.toggle('paused', !timerRunning);
+  }
+
+  function resetTimer() {
+    timerRemaining = TIMER_SECONDS * 1000;
+    timerRunning = false;
+    renderTimer(true);
+  }
+
+  function startTimer() {
+    if (timerRunning || state.over || !state.active) return;
+    if (settingsOpen || document.hidden) {
+      renderTimer(true);
+      return;
+    }
+    if (timerRemaining <= 0) timerRemaining = TIMER_SECONDS * 1000;
+    timerEnd = performance.now() + timerRemaining;
+    timerRunning = true;
+    renderTimer(true);
+  }
+
+  function pauseTimer() {
+    if (!timerRunning) return;
+    timerRemaining = Math.max(0, timerEnd - performance.now());
+    timerRunning = false;
+    renderTimer(true);
+  }
+
+  function resumeTimer() {
+    if (timerRunning || state.over || !state.active || state.busy) return;
+    if (settingsOpen || document.hidden) return;
+    if (timerRemaining <= 0) timerRemaining = TIMER_SECONDS * 1000;
+    timerEnd = performance.now() + timerRemaining;
+    timerRunning = true;
+    renderTimer(true);
+  }
+
+  function stopTimer() {
+    timerRunning = false;
+    timerRemaining = TIMER_SECONDS * 1000;
+    renderTimer(true);
+  }
+
+  function timerTick() {
+    if (!timerRunning) return;
+    timerRemaining = Math.max(0, timerEnd - performance.now());
+    if (timerRemaining <= 0) {
+      onTimerTimeout();
+      return;
+    }
+    renderTimer(false);
+  }
+
+  function onTimerTimeout() {
+    if (!timerRunning || state.busy || state.over) return;
+
+    timerRemaining = TIMER_SECONDS * 1000;
+    timerEnd = performance.now() + timerRemaining;
+    damage(1);
+    FP.play('hurt');
+    vibrate([25, 35, 25]);
+    stageShake();
+    hurtFlashOn();
+    setStatus('TIME OUT!', 'bad');
+    setCaption('Too slow! -\u00bd heart. The 30s timer restarts.');
+    renderTimer(true);
+
+    if (state.hp <= 0) {
+      stopTimer();
+      gameOver();
+      return;
+    }
+
+    window.setTimeout(function () {
+      if (!state.over && state.active && !state.busy) {
+        setStatus('READY', '');
+        setCaption('Hold the mic and pronounce the word');
+      }
+    }, 1400);
   }
 
   function stageShake() {
@@ -697,6 +797,9 @@
       micWrap.classList.remove('listening', 'hearing');
       micWrap.style.setProperty('--lvl', '0');
       micBtn.setAttribute('aria-pressed', 'false');
+      pauseTimer();
+    } else {
+      startTimer();
     }
     micHint.textContent = on ? 'HOLD' : 'WAIT';
   }
@@ -724,6 +827,7 @@
     const phase = level.phases[0];
 
     setReady(false);
+    resetTimer();
     hideOverlay();
     hideSpeech();
     setPose(playerSlot, 'stand');
@@ -756,6 +860,7 @@
 
     const phase = LEVELS[state.levelIndex].phases[index];
     setReady(false);
+    resetTimer();
     setPose(playerSlot, 'stand');
     playerSlot.classList.remove('downed', 'hurt', 'attacking', 'walking');
     renderPips();
@@ -871,6 +976,7 @@
     nextFlow();
     state.busy = true;
     setReady(false);
+    stopTimer();
     hideSpeech();
     FP.play('level');
 
@@ -908,6 +1014,7 @@
     state.busy = true;
     state.over = true;
     setReady(false);
+    stopTimer();
     hideSpeech();
     hideBanner();
 
@@ -965,6 +1072,7 @@
     state.busy = true;
     state.over = true;
     setReady(false);
+    stopTimer();
     hideSpeech();
     hideBanner();
     setPose(playerSlot, 'down');
@@ -1131,7 +1239,7 @@
   }
 
   /* ---------------------------------------------------------------------
-     Speech recognition + microphone meter
+     Speech recognition
      --------------------------------------------------------------------- */
 
   function setListening(on) {
@@ -1161,7 +1269,6 @@
         /* ignore */
       }
     }
-    ensureMic();
 
     holding = true;
     resolved = false;
@@ -1216,9 +1323,43 @@
 
     recognition = instance;
     instance.lang = 'fr-FR';
-    instance.continuous = true;
+    instance.continuous = false;
     instance.interimResults = true;
     instance.maxAlternatives = 5;
+
+    instance.onstart = function () {
+      if (token !== listenToken || !holding) return;
+      setListening(true);
+    };
+
+    instance.onaudiostart = function () {
+      if (token !== listenToken || !holding) return;
+      micWrap.classList.add('listening');
+    };
+
+    instance.onsoundstart = function () {
+      if (token !== listenToken || !holding) return;
+      micWrap.classList.add('hearing');
+      micWrap.style.setProperty('--lvl', '0.55');
+    };
+
+    instance.onspeechstart = function () {
+      if (token !== listenToken || !holding) return;
+      micWrap.classList.add('hearing');
+      micWrap.style.setProperty('--lvl', '0.85');
+    };
+
+    instance.onspeechend = function () {
+      if (token !== listenToken) return;
+      micWrap.classList.remove('hearing');
+      micWrap.style.setProperty('--lvl', '0');
+    };
+
+    instance.onsoundend = function () {
+      if (token !== listenToken) return;
+      micWrap.classList.remove('hearing');
+      micWrap.style.setProperty('--lvl', '0');
+    };
 
     instance.onresult = function (event) {
       if (token !== listenToken) return;
@@ -1243,15 +1384,21 @@
     instance.onerror = function (event) {
       if (token !== listenToken) return;
       lastError = event.error || 'error';
-      if (event.error === 'not-allowed' || event.error === 'service-not-allowed' || event.error === 'audio-capture') {
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         showFallback('MIC BLOCKED');
+      } else if (event.error === 'audio-capture') {
+        showFallback('NO MICROPHONE');
+      } else if (event.error === 'language-not-supported') {
+        showFallback('FRENCH VOICE MISSING');
       } else if (event.error === 'network') {
-        setStatus('NETWORK ERROR', 'bad');
+        setStatus('VOICE SERVICE OFFLINE', 'bad');
       }
     };
 
     instance.onend = function () {
       if (token !== listenToken || resolved) return;
+      micWrap.classList.remove('hearing');
+      micWrap.style.setProperty('--lvl', '0');
       if (holding && !heardFinals.length && !heardInterim && restartCount < 2 && lastError !== 'not-allowed') {
         restartCount += 1;
         window.setTimeout(function () {
@@ -1332,46 +1479,6 @@
     }
   }
 
-  async function ensureMic() {
-    if (micStream || micRequested) return;
-    micRequested = true;
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      micRequested = false;
-      return;
-    }
-    try {
-      micStream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true }
-      });
-      const context = FP.unlockAudio();
-      if (!context) return;
-      const source = context.createMediaStreamSource(micStream);
-      analyser = context.createAnalyser();
-      analyser.fftSize = 256;
-      analyser.smoothingTimeConstant = 0.65;
-      source.connect(analyser);
-      micData = new Uint8Array(analyser.fftSize);
-      micLoop();
-    } catch (error) {
-      micRequested = false;
-    }
-  }
-
-  function micLoop() {
-    if (!analyser || !micData) return;
-    analyser.getByteTimeDomainData(micData);
-    let sum = 0;
-    for (let i = 0; i < micData.length; i += 1) {
-      const value = (micData[i] - 128) / 128;
-      sum += value * value;
-    }
-    const rms = Math.sqrt(sum / micData.length);
-    const level = Math.max(0, Math.min(1, (rms - 0.012) / 0.16));
-    micWrap.style.setProperty('--lvl', level.toFixed(2));
-    micWrap.classList.toggle('hearing', holding && rms > 0.026);
-    window.requestAnimationFrame(micLoop);
-  }
-
   function showFallback(message) {
     fallbackActive = true;
     resolved = true;
@@ -1394,14 +1501,7 @@
         /* ignore */
       }
     }
-    if (micStream) {
-      micStream.getTracks().forEach(function (track) {
-        track.stop();
-      });
-      micStream = null;
-    }
-    analyser = null;
-    micData = null;
+    setListening(false);
   }
 
   /* ---------------------------------------------------------------------
@@ -1478,12 +1578,31 @@
 
   window.addEventListener('pagehide', cleanupMic);
 
+  window.addEventListener('fp-settings', function (event) {
+    settingsOpen = Boolean(event.detail && event.detail.open);
+    if (settingsOpen) {
+      pauseTimer();
+    } else {
+      resumeTimer();
+    }
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      pauseTimer();
+    } else {
+      resumeTimer();
+    }
+  });
+
   /* ---------------------------------------------------------------------
      Boot
      --------------------------------------------------------------------- */
 
   buildHearts();
   initPlayer();
+  resetTimer();
+  window.setInterval(timerTick, 100);
   startGame();
 
   /* Tiny debug hook: game.html?debug=1 exposes a way to simulate a word. */
@@ -1526,6 +1645,15 @@
       },
       gameOver: gameOver,
       skip: skipWord,
+      timer: function () {
+        return { remaining: timerRemaining, running: timerRunning };
+      },
+      timerSet: function (seconds) {
+        timerRemaining = Math.max(0, Number(seconds) || 0) * 1000;
+        if (timerRunning) timerEnd = performance.now() + timerRemaining;
+        renderTimer(true);
+      },
+      timeout: onTimerTimeout,
       micDown: micDown,
       micUp: micUp
     };

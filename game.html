@@ -42,6 +42,23 @@
           <div class="level-tag" id="levelTag">LVL 1 · RUE DE PARIS</div>
           <div class="pips" id="pips" aria-hidden="true"></div>
 
+          <div class="timer-chip paused" id="timerChip" aria-label="Time left: 30 seconds">
+            <span class="timer-top">
+              <svg class="timer-icon" viewBox="0 0 16 16" aria-hidden="true">
+                <rect x="4" y="1" width="8" height="1" />
+                <rect x="5" y="2" width="6" height="1" />
+                <rect x="6" y="3" width="4" height="2" />
+                <rect x="7" y="5" width="2" height="2" />
+                <rect x="6" y="7" width="4" height="2" />
+                <rect x="5" y="9" width="6" height="1" />
+                <rect x="4" y="10" width="8" height="1" />
+              </svg>
+              <span class="timer-value" id="timerValue">30</span>
+              <span class="timer-unit">s</span>
+            </span>
+            <span class="timer-bar"><b id="timerFill"></b></span>
+          </div>
+
           <div class="speech" id="speech" aria-live="polite">
             <div class="speech-top">
               <span class="speech-tag" id="speechTag">CRS</span>

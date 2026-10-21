@@ -417,6 +417,7 @@
     settingsTrigger = trigger || null;
     syncSettingsUI();
     el.hidden = false;
+    window.dispatchEvent(new CustomEvent('fp-settings', { detail: { open: true } }));
     SFX.click();
     const close = el.querySelector('[data-settings-close]');
     if (close) {
@@ -431,6 +432,7 @@
   function closeSettings() {
     if (!settingsEl || settingsEl.hidden) return;
     settingsEl.hidden = true;
+    window.dispatchEvent(new CustomEvent('fp-settings', { detail: { open: false } }));
     SFX.click();
     if (settingsTrigger && document.contains(settingsTrigger)) {
       try {
